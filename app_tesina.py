@@ -55,20 +55,20 @@ class AnalizadorWorker(QObject):
             video = v2.CenterCrop(112)(video)
             video = video.float() / 255.0
             
-            #Mover video a GPU 
+            # 6. Mover video a GPU 
             video = video.to(self.device)
             
-            # Normalizar con tensores
+            # 7. Normalizar con tensores
             mean = torch.tensor([0.43216, 0.394666, 0.37645], device=self.device).view(3, 1, 1, 1)
             std = torch.tensor([0.22803, 0.22145, 0.216989], device=self.device).view(3, 1, 1, 1)
             video = (video - mean) / std
             
-            # 6. Agregar dimensión de batch 
+            # 8. Agregar dimensión de batch 
             input_tensor = video.unsqueeze(0) 
             
             self.progreso.emit(50)
             
-            # 7. Predicción
+            # 9. Predicción
             with torch.no_grad():
                 output = self.model(input_tensor)
                 probs = torch.softmax(output, dim=1)
@@ -76,7 +76,7 @@ class AnalizadorWorker(QObject):
                 prob_mal = probs[0][1].item() * 100
                 clase = torch.argmax(probs).item()
             
-            # 8. Resultado
+            # 10. Resultado
             if clase == 0:
                 resultado_texto = f"Técnica Correcta ✅ ({prob_bien:.1f}%)"
             else:
@@ -251,7 +251,7 @@ class VentanaPrincipal(QMainWindow):
         self.resultado_label.setText(texto)
         self.progress_bar.hide()  # ocultar barra al terminar
         
-        # Extraer porcentaje si existe
+        # Extraer porcentaje
         import re
         match = re.search(r'\(([\d\.]+)%\)', texto)
         
